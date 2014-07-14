@@ -56,6 +56,13 @@ class BusinessDayTest < Test::Unit::TestCase
                   'Totale giornaliero: 08h 30m +00h 30m'], @day.report
   end
 
+  def test_report_transfer
+    @day.add_permit_minutes('TRASFERTA', 480)
+    assert_equal ['FRIDAY 23/05/2014 ore lavorate: - -08h 00m',
+                  'TRASFERTA - 08h 00m',
+                  'Totale giornaliero: 08h 00m =='], @day.report
+  end
+
   def test_equality
     a_day = BusinessDay.new(Date.parse('23/05/2014'))
     a_day.add_worked_hours(['08:30', '13:00', '14:00', '17:30'])

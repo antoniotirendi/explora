@@ -6,17 +6,17 @@ class ExploraTest < Test::Unit::TestCase
     work_times_lines_are []
   end
 
-  def test_dailies_work_from_file # OK
+  def test_dailies_work_from_file
     Explora.any_instance.unstub(:read_times)
     assert_equal 3, Explora.new.business_days.count
   end
 
-  def test_work_permits_from_file # OK
+  def test_work_permits_from_file
     Explora.any_instance.unstub(:read_workpermits)
-    assert_equal 5, Explora.new.business_days.count
+    assert_equal 6, Explora.new.business_days.count
   end
 
-  def test_business_days_for_worked_hours # OK
+  def test_business_days_for_worked_hours
     work_times_lines_are ['MARTEDÌ 03/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	E08:00 U13:00 E14:00 U17:30',
                           'MERCOLEDÌ 04/06/2014	 Aggiungi Timbratura',
@@ -28,26 +28,26 @@ class ExploraTest < Test::Unit::TestCase
     assert_equal [first_day, second_day], Explora.new.business_days
   end
 
-  def test_no_business_day # OK
+  def test_no_business_day
     work_times_lines_are ['SABATO 21/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	 - ']
     assert_empty Explora.new.business_days
   end
 
-  def test_business_day_not_worked # OK
+  def test_business_day_not_worked
     work_times_lines_are ['VENERDÌ 20/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	 - ']
     assert_equal [BusinessDay.new(Date.parse('20/06/2014'))],
                  Explora.new.business_days
   end
 
-  def test_holiday_is_not_a_daily_work # OK
+  def test_holiday_is_not_a_daily_work
     work_times_lines_are ['LUNEDÌ 02/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	 -']
     assert_empty Explora.new.business_days
   end
 
-  def test_business_days_for_partial_permit_hours # OK
+  def test_business_days_for_partial_permit_hours
     permits_lines_are ['12/06/2014	RIDUZ. ORARIO',
                        '[Durata: 0100] [dal 10/06/2014 al 10/06/2014]',
                        'Approvata e Trasferita']
@@ -56,7 +56,7 @@ class ExploraTest < Test::Unit::TestCase
     assert_equal [day], Explora.new.business_days
   end
 
-  def test_business_days_for_full_day_permit_hours # OK
+  def test_business_days_for_full_day_permit_hours
     permits_lines_are ['18/06/2014	FERIE',
                        '[Giornata intera] [dal 13/06/2014 al 17/06/2014]',
                        'Approvata e Trasferita']
@@ -69,7 +69,7 @@ class ExploraTest < Test::Unit::TestCase
     assert_equal [first_day, second_day, third_day], Explora.new.business_days
   end
 
-  def test_business_days_with_work_and_permit # OK
+  def test_business_days_with_work_and_permit
     work_times_lines_are ['MARTEDÌ 10/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	E08:30 U13:00']
     permits_lines_are ['12/06/2014	RIDUZ. ORARIO',
@@ -81,53 +81,62 @@ class ExploraTest < Test::Unit::TestCase
     assert_equal [day], Explora.new.business_days
   end
 
-  def test_overall_report_one_day # OK
-    work_times_lines_are ['MARTEDÌ 03/06/2014	 Aggiungi Timbratura',
-                          'Timbrature:	E08:30 U13:00 E14:00 U17:30']
-    assert_equal ['-------------------------------------',
-                  'TUESDAY 03/06/2014 ore lavorate: 08h 00m ==',
-                  '=====================================',
-                  '1 Giorno lavorativo, ore lavorate: 08h 00m, permessi: -, ==',
-                  '====================================='], Explora.new.overall_report
+  def test_business_day_transfer
+    permits_lines_are ['07/07/2014	TRASFERTA',
+                       '[Giornata intera] [dal 04/07/2014 al 04/07/2014]',
+                       'In Attesa']
+    day = BusinessDay.new(Date.parse('04/07/2014'))
+    day.add_permit_minutes('TRASFERTA', 480)
+    assert_equal [day], Explora.new.business_days
   end
 
-  def test_overall_report_more_days # OK
+  def test_overall_report_one_day
+    work_times_lines_are ['MARTEDÌ 03/06/2014	 Aggiungi Timbratura',
+                          'Timbrature:	E08:30 U13:00 E14:00 U17:30']
+    assert_equal ['-------------------------------------------------------------------------',
+                  'TUESDAY 03/06/2014 ore lavorate: 08h 00m ==',
+                  '=========================================================================',
+                  '1 Giorno lavorativo, ore lavorate: 08h 00m, permessi: -, ==',
+                  '========================================================================='], Explora.new.overall_report
+  end
+
+  def test_overall_report_more_days
     work_times_lines_are ['MARTEDÌ 03/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	E08:30 U13:00 E14:00 U17:30',
                           'MERCOLEDÌ 04/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	E08:30 U13:01 E13:59 U17:30']
-    assert_equal ['-------------------------------------',
+    assert_equal ['-------------------------------------------------------------------------',
                   'TUESDAY 03/06/2014 ore lavorate: 08h 00m ==',
-                  '-------------------------------------',
+                  '-------------------------------------------------------------------------',
                   'WEDNESDAY 04/06/2014 ore lavorate: 08h 02m +00h 02m',
-                  '=====================================',
+                  '=========================================================================',
                   '2 Giorni lavorativi, ore lavorate: 16h 02m, permessi: -, +00h 02m',
-                  '====================================='], Explora.new.overall_report
+                  '========================================================================='], Explora.new.overall_report
   end
 
-  def test_overall_report_business_day_not_worked_without_permit # OK
+  def test_overall_report_business_day_not_worked_without_permit
     work_times_lines_are ['MARTEDÌ 03/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	 - ',]
-    assert_equal ['-------------------------------------',
+    assert_equal ['-------------------------------------------------------------------------',
                   'TUESDAY 03/06/2014 ore lavorate: - -08h 00m',
-                  '=====================================',
+                  '=========================================================================',
                   '1 Giorno lavorativo, ore lavorate: -, permessi: -, -08h 00m',
-                  '====================================='], Explora.new.overall_report
+                  '========================================================================='], Explora.new.overall_report
   end
 
-  def test_overall_report_with_permit_full_day # OK
+  def test_overall_report_with_permit_full_day
     work_times_lines_are ['MARTEDÌ 03/06/2014	 Aggiungi Timbratura',
                           'Timbrature:	 - ']
     permits_lines_are ['10/06/2014	FERIE',
                        '[Giornata intera] [dal 03/06/2014 al 03/06/2014]',
                        'Approvata e Trasferita']
-    assert_equal ['-------------------------------------',
+    assert_equal ['-------------------------------------------------------------------------',
                   'TUESDAY 03/06/2014 ore lavorate: - -08h 00m',
                   'FERIE - 08h 00m',
                   'Totale giornaliero: 08h 00m ==',
-                  '=====================================',
+                  '=========================================================================',
                   '1 Giorno lavorativo, ore lavorate: -, permessi: 08h 00m, ==',
-                  '====================================='], Explora.new.overall_report
+                  '========================================================================='], Explora.new.overall_report
   end
 
   def test_print

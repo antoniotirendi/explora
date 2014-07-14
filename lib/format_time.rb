@@ -1,5 +1,6 @@
 module FormatTime
   def format_in_hours(minutes)
+    return '-' if minutes == 0
     hours=minutes/60
     minutes -= hours * 60
 

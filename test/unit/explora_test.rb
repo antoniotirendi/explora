@@ -42,7 +42,7 @@ class ExploraTest < Test::Unit::TestCase
   end
 
   def test_holiday_is_not_a_daily_work
-    work_times_lines_are ['LUNEDÌ 02/06/2014	 Aggiungi Timbratura',
+    work_times_lines_are ['LUNEDÌ 02/06/2016	 Aggiungi Timbratura',
                           'Timbrature:	 -']
     assert_empty Explora.new.business_days
   end

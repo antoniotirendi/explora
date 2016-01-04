@@ -2,4 +2,4 @@ require 'business_time'
 
 require_rel '**/*.rb'
 
-BusinessTime::Config.holidays << Date.parse('02/06/2014')
+BusinessTime::Config.load(File.expand_path(File.join(__dir__, '..','config', 'business_time.yml')))

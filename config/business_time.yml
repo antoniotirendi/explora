@@ -1,0 +1,31 @@
+business_time:
+  holidays:
+   - Jan 1st, 2016
+   - Jan 1st, 2017
+   - Jan 6th, 2016
+   - Jan 6th, 2017
+   - Mar 27th, 2016
+   - Mar 28th, 2016
+   - Apr 16th, 2017
+   - Apr 17th, 2017
+   - Apr 25th, 2016
+   - Apr 25th, 2017
+   - May 1st, 2016
+   - May 1st, 2017
+   - Jun 2nd, 2014
+   - Jun 2nd, 2016
+   - Jun 2nd, 2017
+   - Aug 15th, 2016
+   - Aug 15th, 2017
+   - Nov 1st, 2016
+   - Nov 1st, 2017
+   - Dec 8th, 2015
+   - Dec 8th, 2016
+   - Dec 8th, 2017
+   - Dec 25th, 2015
+   - Dec 25th, 2016
+   - Dec 26th, 2015
+   - Dec 26th, 2016
+   - Dec 31th, 2015
+   - Dec 31th, 2016
+   - Dec 31th, 2017

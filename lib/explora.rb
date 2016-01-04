@@ -80,6 +80,8 @@ class Explora
     worked_times=line.split(/\t/)[1].split('E')
     worked_times.shift
     worked_times.map { |worked_time| worked_time.strip.split(' U') }.flatten
+  rescue
+    p line
   end
 
   def overall_report
